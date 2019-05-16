@@ -1,13 +1,8 @@
 #!/bin/bash
 
-
 # Update and install critical packages
 LOG_FILE="/tmp/ec2_bootstrap.sh.log"
 echo "Logging to \"$LOG_FILE\" ..."
-
-
-
-
 
 #
 # Hants' Requirements - INSTALLATION OF PYENV - PYTHON VERSION MANAGEMENT TOOL
@@ -23,8 +18,6 @@ echo 'export PATH="$PYENV_ROOT/bin:$PATH"' >> ~/.bashrc;
 echo -e 'if command -v pyenv 1>/dev/null 2>&1; then\n  eval "$(pyenv init -)"\nfi' >> ~/.bashrc;
 #IN ORDER FOR THE NEXT TWO COMMANDS TO WOKK 
 exec "$SHELL";
-
-
 
 #
 # Cleanup

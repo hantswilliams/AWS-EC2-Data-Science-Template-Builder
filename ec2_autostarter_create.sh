@@ -37,7 +37,7 @@ if [ "$userresponse1" = "YES" ]; then
       --instance-type t2.micro \
       --block-device-mappings '{"DeviceName":"/dev/sda1","Ebs":{"DeleteOnTermination":true,"VolumeSize":'$ebsvolumeamount'}}' \
       --count 1 \
-      #--user-data file://ec2_bootstrap.sh \
+      # --user-data file://ec2_testscript.sh \
   
   echo 'Completed - Please Check AWS to confirm';
   

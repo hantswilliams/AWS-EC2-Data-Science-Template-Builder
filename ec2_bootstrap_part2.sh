@@ -1,17 +1,13 @@
 #!/bin/bash
 
-
 # Update and install critical packages
 LOG_FILE="/tmp/ec2_bootstrap.sh.log"
 echo "Logging to \"$LOG_FILE\" ..."
-
-
 echo 'Continuing off where pyenv installed.....now going to download specific python version';
 echo 'Installing Python 3.6.4 and setting as default python'; 
 pyenv install 3.6.4;
 pyenv global 3.6.4; 
 echo 'Done';
-
 
 
 
@@ -51,8 +47,6 @@ EOF
 echo 'mysql jobs finished';
 
 
-
-
 #
 # Hants' Requirements - INSTALLATION OF SUPERSET 
 #
@@ -78,7 +72,6 @@ on the appropriate port"
 
 
 
-
 #
 # Hants' Requirements - INSTALLATION OF AIRFLOW  
 #
@@ -90,16 +83,16 @@ cd airflow;
 mkdir dags;
 mkdir plugins;
 cd;
-echo "
-then go into $AIRFLOW_HOME/airflow.cfg and change the config file to redirect to appropriate mysql db;
-replace sql_alchemy_conn with following, or whwatever DB. name is (https://airflow.apache.org/howto/initialize-database.html)
-sql_alchemy_conn = mysql://airflowuser:1910Alht4656!@localhost/airflow
-load_examples = False
-catchup_by_default = False"
-echo "'then reset the db for the changes to take effect'
+echo "then go into $AIRFLOW_HOME/airflow.cfg and change the config file to redirect to appropriate mysql db;
+replace sql_alchemy_conn with following, or whwatever DB. name is, and turn off load_examples and catchup by default"
+sed -i '.txt' '/\(^load_examples=\).*/ s//\1False/' UPDATE/LOCATION/TO/CONFIGFILE/temp.txt     #note - for ubuntu, might need to replace/remove the initial '.txt' in front 
+sed -i '.txt' '/\(^catchup_by_default=\).*/ s//\1False/' UPDATE/LOCATION/TO/CONFIGFILE/temp.txt
+varconfiguration="mysql://airflowuser:1910Alht4656!@localhost/airflow"
+sed -i '.txt' "/\(^sql_alchemy_conn=\).*/ s//\1${varconfiguration//\//\\/}/" UPDATE/LOCATION/TO/CONFIGFILE/temp.txt   #https://stackoverflow.com/questions/27787536/how-to-pass-a-variable-containing-slashes-to-sed
+echo "'then reset the db for the changes to take effect"
 airflow resetdb;
 airflow initdb;
-"
+
 
 
 
