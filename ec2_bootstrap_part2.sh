@@ -47,6 +47,10 @@ EOF
 echo 'mysql jobs finished';
 
 
+
+
+
+
 #
 # Hants' Requirements - INSTALLATION OF SUPERSET 
 #
@@ -63,12 +67,29 @@ cd /home/ubuntu/superset;
 pip install superset==0.28.1; 
 cd; 
 deactivate;
+
 echo "IMPORTANT NOTE 1 - after this script finishes, need to go into the config file for superset,
-and change the backend DB connection to SQLALCHEMY_DATABASE_URI = 'mysql://{USER}:{PASSWORD}@localhost/{DBNAME}'
-or whatever the username/login should be for the superset mysql connection" 
+and change the backend DB connection to SQLALCHEMY_DATABASE_URI = to the proper connection"
+
+VAL="mysql://supersetuser:1910Alht4656!@localhost/superset";
+sed -i -e "/SQLALCHEMY_DATABASE_URI =/ s/= .*/= ${VAL//\//\\/}/" /home/ubuntu/superset/env/lib/python3.6/site-packages/superset/config.py;
+
 echo "IMPORTANT NOTE 2 - after updating the config file, will still need to go through and run the 
 fabmanager create-admin steps, superset db upgrade, superset init, and then finally the runserver command 
 on the appropriate port" 
+
+yes | sudo apt-get install libmysqlclient-dev; pip install mysqlclient; 
+y | pip uninstall pandas;
+y | pip install pandas==0.23.4
+pip install sqlalchemy==1.2.18;
+
+
+
+
+
+
+
+
 
 
 
@@ -82,16 +103,27 @@ airflow initdb
 cd airflow;
 mkdir dags;
 mkdir plugins;
-cd;
+
 echo "then go into $AIRFLOW_HOME/airflow.cfg and change the config file to redirect to appropriate mysql db;
 replace sql_alchemy_conn with following, or whwatever DB. name is, and turn off load_examples and catchup by default"
-sed -i '.txt' '/\(^load_examples=\).*/ s//\1False/' UPDATE/LOCATION/TO/CONFIGFILE/temp.txt     #note - for ubuntu, might need to replace/remove the initial '.txt' in front 
-sed -i '.txt' '/\(^catchup_by_default=\).*/ s//\1False/' UPDATE/LOCATION/TO/CONFIGFILE/temp.txt
-varconfiguration="mysql://airflowuser:1910Alht4656!@localhost/airflow"
-sed -i '.txt' "/\(^sql_alchemy_conn=\).*/ s//\1${varconfiguration//\//\\/}/" UPDATE/LOCATION/TO/CONFIGFILE/temp.txt   #https://stackoverflow.com/questions/27787536/how-to-pass-a-variable-containing-slashes-to-sed
+
+sed -i -e "/load_examples =/ s/= .*/= False/" /home/ubuntu/airflow/airflow.cfg
+sed -i -e "/catchup_by_default =/ s/= .*/= False/" /home/ubuntu/airflow/airflow.cfg
+
+varconfigurationairflow="mysql://airflowuser:1910Alht4656!@localhost/airflow"
+
+sed -i -e "/sql_alchemy_conn =/ s/= .*/= ${varconfigurationairflow//\//\\/}/" /home/ubuntu/airflow/airflow.cfg
+#https://stackoverflow.com/questions/27787536/how-to-pass-a-variable-containing-slashes-to-sed
+
 echo "'then reset the db for the changes to take effect"
-airflow resetdb;
-airflow initdb;
+y | airflow resetdb;
+y | airflow initdb;
+
+
+
+
+
+
 
 
 
@@ -101,6 +133,18 @@ airflow initdb;
 # make sure we own ~/.bash_profile after all the 'sudo tee'
 sudo chgrp ubuntu ~/.bash_profile
 sudo chown ubuntu ~/.bash_profile
+
+echo "IMPORTANT NOTE FOR SUPERSET TO FUNCTION - will still need to go through and run the 
+fabmanager create-admin steps, superset db upgrade, superset init, and then finally the runserver command 
+on the appropriate port" | tee -a $LOG_FILE
+echo 'fabmanager create-admin --app superset' | tee -a $LOG_FILE
+echo 'superset db upgrade' | tee -a $LOG_FILE
+echo 'superset init' | tee -a $LOG_FILE
+echo 'superset runserver -d'  | tee -a $LOG_FILE. #to run on port 8080
+
+echo "IMPORTANT NOTE FOR AIRFLOW TO FUNCTION - will still need to start via 
+airflow scheduler -D;
+airflow webserver -D;" | tee -a $LOG_FILE
 
 
 #
