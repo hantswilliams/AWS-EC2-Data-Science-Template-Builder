@@ -32,12 +32,12 @@ yes | sudo apt install mysql-server;
 yes | sudo apt-get install libmysqlclient-dev;
 pip install mysqlclient;   #https://www.shellhacks.com/mysql-run-query-bash-script-linux-command-line/
 sudo mysql <<EOF
-#ALTER USER 'root'@'localhost' IDENTIFIED WITH mysql_native_password BY '46566656';
+#ALTER USER 'root'@'localhost' IDENTIFIED WITH mysql_native_password BY 'TEMPPASSWORD';
 SET GLOBAL explicit_defaults_for_timestamp=1;   #note - this is for airflow / superset DB configuration 
 CREATE DATABASE superset CHARACTER SET utf8 COLLATE utf8_bin; 
 CREATE DATABASE airflow CHARACTER SET utf8 COLLATE utf8_unicode_ci; 
-CREATE USER 'airflowuser'@'localhost' IDENTIFIED BY '1910Alht4656!';
-CREATE USER 'supersetuser'@'localhost' IDENTIFIED BY '1910Alht4656!';
+CREATE USER 'airflowuser'@'localhost' IDENTIFIED BY 'TEMPPASSWORD!';
+CREATE USER 'supersetuser'@'localhost' IDENTIFIED BY 'TEMPPASSWORD!';
 GRANT ALL PRIVILEGES ON airflow.* TO 'airflowuser'@'localhost';
 GRANT ALL PRIVILEGES ON superset.* TO 'supersetuser'@'localhost';
 FLUSH PRIVILEGES; 
@@ -71,7 +71,7 @@ deactivate;
 echo "IMPORTANT NOTE 1 - after this script finishes, need to go into the config file for superset,
 and change the backend DB connection to SQLALCHEMY_DATABASE_URI = to the proper connection"
 
-VAL="mysql://supersetuser:1910Alht4656!@localhost/superset";
+VAL="mysql://supersetuser:TEMPPASSWORD!@localhost/superset";
 sed -i -e "/SQLALCHEMY_DATABASE_URI =/ s/= .*/= ${VAL//\//\\/}/" /home/ubuntu/superset/env/lib/python3.6/site-packages/superset/config.py;
 
 echo "IMPORTANT NOTE 2 - after updating the config file, will still need to go through and run the 
@@ -110,7 +110,7 @@ replace sql_alchemy_conn with following, or whwatever DB. name is, and turn off 
 sed -i -e "/load_examples =/ s/= .*/= False/" /home/ubuntu/airflow/airflow.cfg
 sed -i -e "/catchup_by_default =/ s/= .*/= False/" /home/ubuntu/airflow/airflow.cfg
 
-varconfigurationairflow="mysql://airflowuser:1910Alht4656!@localhost/airflow"
+varconfigurationairflow="mysql://airflowuser:TEMPPASSWORD!@localhost/airflow"
 
 sed -i -e "/sql_alchemy_conn =/ s/= .*/= ${varconfigurationairflow//\//\\/}/" /home/ubuntu/airflow/airflow.cfg
 #https://stackoverflow.com/questions/27787536/how-to-pass-a-variable-containing-slashes-to-sed
