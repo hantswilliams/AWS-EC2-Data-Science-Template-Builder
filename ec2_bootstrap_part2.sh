@@ -10,7 +10,6 @@ pyenv global 3.6.4;
 echo 'Done';
 
 
-
 #
 # Hants' Requirements - INSTALLATION OF VIRTUALENV, GUNICIORN, and FEATHER 
 #
@@ -19,6 +18,19 @@ pip install virtualenv;
 pip install gunicorn;
 pip install feather-format;
 echo 'Done';
+
+
+
+####Should think about adding these to this as well: 
+#1) Zookeeper 
+#2) Kafka 
+#3) Elasticsearch 
+#4) Jupiyter Notebook 
+#5) Docker 
+
+
+#################################################################################################################################################################
+#################################################################################################################################################################
 
 
 
@@ -46,6 +58,8 @@ EOF
 #'note to self: mysql -u root -p';
 echo 'mysql jobs finished';
 
+#################################################################################################################################################################
+#################################################################################################################################################################
 
 
 
@@ -58,7 +72,6 @@ echo 'Installing superset within a virtualenv - located in home/ubunt/superset';
 echo 'After installation with basic sqlite backend, will then convert the sqlite backend to our full-fledge mySQL backend';
 yes | sudo apt-get install build-essential libssl-dev libffi-dev libsasl2-dev libldap2-dev;
 echo 'now installing specific superset dependencies for mysql backend'
-yes | sudo apt-get install libmysqlclient-dev; pip install mysqlclient; 
 cd;
 mkdir superset; cd superset; python -m venv env;
 cd env/bin;
@@ -66,24 +79,30 @@ source activate;
 cd /home/ubuntu/superset;
 pip install superset==0.28.1; 
 cd; 
-deactivate;
+y | pip uninstall pandas;
+y | pip install pandas==0.23.4
+pip install sqlalchemy==1.2.18;
+yes | sudo apt-get install libmysqlclient-dev; 
+pip install mysqlclient; 
+
 
 echo "IMPORTANT NOTE 1 - after this script finishes, need to go into the config file for superset,
 and change the backend DB connection to SQLALCHEMY_DATABASE_URI = to the proper connection"
 
-VAL="mysql://supersetuser:TEMPPASSWORD!@localhost/superset";
+VAL="'mysql://supersetuser:TEMPPASSWORD!@localhost/superset'";    #note - this includes 'xx' insside of the string; because superset requires them; 
 sed -i -e "/SQLALCHEMY_DATABASE_URI =/ s/= .*/= ${VAL//\//\\/}/" /home/ubuntu/superset/env/lib/python3.6/site-packages/superset/config.py;
 
-echo "IMPORTANT NOTE 2 - after updating the config file, will still need to go through and run the 
-fabmanager create-admin steps, superset db upgrade, superset init, and then finally the runserver command 
-on the appropriate port" 
+#check out this potential command for doing the below, but automated: 
+echo "loading in user credentials";
+#cd /home/ubuntu/superset_test/env/lib/python3.6/site-packages/superset/bin;
+fabmanager create-admin --app 'superset' --username 'hants' --firstname 'hants'  --lastname 'williams'  --email 'hantsawilliams@gmail.com' --password '46566656';
+superset db upgrade | tee -a $LOG_FILE
+superset init | tee -a $LOG_FILE
 
-yes | sudo apt-get install libmysqlclient-dev; pip install mysqlclient; 
-y | pip uninstall pandas;
-y | pip install pandas==0.23.4
-pip install sqlalchemy==1.2.18;
+#superset runserver -d  | tee -a $LOG_FILE. #to run on port 8080
 
-
+#################################################################################################################################################################
+#################################################################################################################################################################
 
 
 
@@ -110,7 +129,7 @@ replace sql_alchemy_conn with following, or whwatever DB. name is, and turn off 
 sed -i -e "/load_examples =/ s/= .*/= False/" /home/ubuntu/airflow/airflow.cfg
 sed -i -e "/catchup_by_default =/ s/= .*/= False/" /home/ubuntu/airflow/airflow.cfg
 
-varconfigurationairflow="mysql://airflowuser:TEMPPASSWORD!@localhost/airflow"
+varconfigurationairflow="mysql://airflowuser:TEMPPASSWORD!@localhost/airflow"  ##note - this does not include 'xx' quotes insside of the string; because airflow does not require them; 
 
 sed -i -e "/sql_alchemy_conn =/ s/= .*/= ${varconfigurationairflow//\//\\/}/" /home/ubuntu/airflow/airflow.cfg
 #https://stackoverflow.com/questions/27787536/how-to-pass-a-variable-containing-slashes-to-sed
@@ -120,11 +139,14 @@ y | airflow resetdb;
 y | airflow initdb;
 
 
+echo "IMPORTANT NOTE FOR AIRFLOW TO FUNCTION - will still need to start via 
+airflow scheduler -D;
+airflow webserver -D;" | tee -a $LOG_FILE
 
 
 
-
-
+#################################################################################################################################################################
+#################################################################################################################################################################
 
 
 
@@ -134,17 +156,10 @@ y | airflow initdb;
 sudo chgrp ubuntu ~/.bash_profile
 sudo chown ubuntu ~/.bash_profile
 
-echo "IMPORTANT NOTE FOR SUPERSET TO FUNCTION - will still need to go through and run the 
-fabmanager create-admin steps, superset db upgrade, superset init, and then finally the runserver command 
-on the appropriate port" | tee -a $LOG_FILE
-echo 'fabmanager create-admin --app superset' | tee -a $LOG_FILE
-echo 'superset db upgrade' | tee -a $LOG_FILE
-echo 'superset init' | tee -a $LOG_FILE
-echo 'superset runserver -d'  | tee -a $LOG_FILE. #to run on port 8080
 
-echo "IMPORTANT NOTE FOR AIRFLOW TO FUNCTION - will still need to start via 
-airflow scheduler -D;
-airflow webserver -D;" | tee -a $LOG_FILE
+
+
+
 
 
 #
