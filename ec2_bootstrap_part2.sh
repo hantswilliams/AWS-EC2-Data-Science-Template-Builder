@@ -21,10 +21,58 @@ echo 'Done';
 
 
 
-####Should think about adding these to this as well: 
-#1) Zookeeper 
-#2) Kafka 
-#3) Elasticsearch 
+###IMPORTANT NOTE - For Zookeeper, Kafka - Need to probably have at least a instance with 10-15 GB memory, 
+###other it will not be able to properly install 
+
+#
+# Hants' Requirements - INSTALLATION OF ZOOKEEPER 
+#
+echo 'Installing ZOOKEEPER, installing java first'
+sudo apt-get install default-jre -y #install java 
+java -version #check to make sure it has installed properly 
+sudo apt-get install zookeeperd -y #installing zookeeper 
+sudo systemctl status zookeeper #ensuring that zookeeper is up and running 
+sudo systemctl enable zookeeper #enabling zookeeper at startup 
+
+
+#
+# Hants' Requirements - INSTALLATION OF KAFKA
+#
+echo 'Installing KAFKA'
+cd; 
+mkdir downloads;
+cd downloads;
+wget ftp://apache.cs.utah.edu/apache.org/kafka/2.2.0/kafka_2.12-2.2.0.tgz;
+sudo mkdir /opt/Kafka ;
+sudo tar xvzf kafka_2.12-2.2.0.tgz -C /opt/Kafka;
+#Test that it is able to boot up normally, otherwise dont perform two lines below 
+#cd /opt/Kafka/kafka_2.12-2.2.0/;
+#sudo bin/kafka-server-start.sh config/server.properties; 
+
+
+#
+# Hants' Requirements - INSTALLATION OF JUPYTER NOTEBOOK 
+#Note - for production purposes, should look into JUPYTER HUB - this allows a single 
+#instance of jupyter that can have multiple users logged into it 
+#
+cd; 
+cd mkdir jupyter;
+cd jupyter;
+python -m venv env;
+cd env/bin;
+source activate;
+cd /home/ubuntu/jupyter/;
+pip install jupyter;
+pip install jupyterlab;
+###to run jupyter: 
+#jupyter notebook
+###################
+###to run jupyter lab: 
+#jupyter lab
+
+
+
+##3) Elasticsearch 
 #4) Jupiyter Notebook 
 #5) Docker 
 
